@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Kamus Global
 const NMAX = 999
 type negara struct {
 	Nama string
@@ -13,9 +14,10 @@ type negara struct {
 	Perunggu int
 }
 
-var daftarNegara [NMAX]negara
+type daftarNegara [NMAX]negara
 var jumlahNegara int = 0
 
+// Fungsi untuk menampilkan menu utama
 func menu() {
 	fmt.Println("------------------------------------")
 	fmt.Println("          SEAGAMES MANAGER          ")
@@ -24,28 +26,33 @@ func menu() {
 	fmt.Println("2. Ubah Data Negara dan Mendali")
 	fmt.Println("3. Hapus Negara Peserta")
 	fmt.Println("4. Tampilkan Peringkat Klasemen")
+	fmt.Println("5. Keluar")
 	fmt.Println("------------------------------------")
 }
 
-
+// Main Function
 func main(){
-	var pilihan, pUbah, index int
+	var pilihan, pUbah, kriteria, index int
 	var nama string
 	var N daftarNegara
 
-	menu()
-	fmt.Println("Pilih 1/2/3/4 ?")
-	fmt.Scan(&pilihan)
+	pilihan = 0
 
+// Looping menu utama
 	for pilihan != 5 {
 
+		menu()
+		fmt.Println("Pilih 1/2/3/4 ?")
+		fmt.Scan(&pilihan)
+
 		if  pilihan  == 1 {
+			fmt.Println("Masukkan nama negara yang ingin ditambahkan:")
 			fmt.Scan(&nama)
-			tambahNegara(nama)
+			tambahNegara(&N, nama)
 		} else if pilihan == 2 {
 			fmt.Println("Masukkan nama negara yang ingin diubah:")
 			fmt.Scan(&nama)
-			index = cariNegaraIndex(nama)
+			index = cariNegaraIndex(N, nama)
 			if index != -1 {
 				fmt.Println("Apa yang ingin diubah?")
 				fmt.Println("1. Data Negara")
@@ -63,7 +70,6 @@ func main(){
 			} else {
 				fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
 			}
-
 			
 		} else if pilihan == 3 {
 			fmt.Println("Masukkan nama negara yang ingin dihapus:")
@@ -73,27 +79,30 @@ func main(){
 			fmt.Println("Pilih kriteria peringkat:")
 			fmt.Println("1. Peringkat Tertinggi ke Rendah")
 			fmt.Println("2. Peringkat Rendah ke Tertinggi")
-			fmt.Scan(&pilihan)
+			fmt.Scan(&kriteria)
 
-			if pilihan == 1 {
+			if kriteria == 1 {
 				peringkatDescending(&N, jumlahNegara)
-				tampilkanKlasemen()
-			} else if pilihan == 2 {
+				tampilkanKlasemen(N, jumlahNegara)
+			} else if kriteria == 2 {
 				peringkatAscending(&N, jumlahNegara)
+				tampilkanKlasemen(N, jumlahNegara)
 			}
+		} else if pilihan == 5 {
+			fmt.Println("Terima kasih telah menggunakan SEAGAMES MANAGER!")
+		} else {
+			fmt.Println("\nGagal: Pilihan tidak valid. Silakan pilih 1/2/3/4/5.")
 		}
 	}
-
-	
-	
 }
 
-func cariNegaraIndex(nama string)int{
+// Fungsi untuk mencari index negara berdasarkan nama
+func cariNegaraIndex(N daftarNegara, nama string)int{
 	var index int = -1
 	var i int = 0
 
 	for i < jumlahNegara && index == -1 {
-		if strings.EqualFold(daftarNegara[i].Nama, nama) {
+		if strings.EqualFold(N[i].Nama, nama) {
 			index = i
 		}
 		i++
@@ -101,26 +110,28 @@ func cariNegaraIndex(nama string)int{
 	return index
 }
 
-func tambahNegara(nama string){
+// fungsi untuk menambahkan negara baru ke dalam daftar
+func tambahNegara(N *daftarNegara, nama string){
 	var emas, perak, perunggu int
 
-	if jumlahNegara <= NMAX {
+	if jumlahNegara >= NMAX {
 		fmt.Println("\nGagal: Kapasitas maksimum negara peserta telah penuh!")
 		return
 	}
 
-	if cariNegaraIndex(nama) != -1 {
+	if cariNegaraIndex(*N, nama) != -1 {
 		fmt.Printf("\nGagal: Negara '%s' sudah terdaftar.\n", nama)
 		return
 	}
 
 	fmt.Println("Masukkan jumlah medali emas, perak, dan perunggu:")
 	fmt.Scan(&emas, &perak, &perunggu)
-	daftarNegara[jumlahNegara] = negara{Nama: nama, Emas: emas, Perak: perak, Perunggu: perunggu}
+	N[jumlahNegara] = negara{Nama: nama, Emas: emas, Perak: perak, Perunggu: perunggu}
 	jumlahNegara++
 	fmt.Printf("\nBerhasil: Negara '%s' berhasil ditambahkan.\n", nama)
 }
 
+// fungsi untuk mengubah data negara
 func ubahDataNegara(N *daftarNegara, nama string, index int) {
 	var emasBaru, perakBaru, perungguBaru int
 
@@ -137,6 +148,7 @@ func ubahDataNegara(N *daftarNegara, nama string, index int) {
 
 }
 
+// Fungsi untuk mengubah data mendali yang spesifik
 func ubahDataMedali(N *daftarNegara, nama string, index int) {
 	var jumlahBaru int
 	var mendaliDiCari string
@@ -154,8 +166,9 @@ func ubahDataMedali(N *daftarNegara, nama string, index int) {
 	}
 }
 
+// Fungsi untuk menghapus negara dari daftar
 func hapusNegara(N *daftarNegara, nama string){
-	var index int = cariNegaraIndex(nama)
+	var index int = cariNegaraIndex(*N, nama)
 	var i int = index
 
 	if index == -1 {
@@ -168,12 +181,13 @@ func hapusNegara(N *daftarNegara, nama string){
 		i++
 	}
 
-	jumlahNegara[jumlahNegara-1] = negara{}
+	N[jumlahNegara-1] = negara{}
 	jumlahNegara--
 	fmt.Printf("\nBerhasil: Negara '%s' berhasil dihapus.\n", nama)
 
 }
 
+// Fungsi untuk mengurutkan dari tertinggi ke terendah berdasarkan jumlah medali emas, perak, dan perunggu
 func peringkatDescending(N *daftarNegara, jumlahNegara int) {
 	var pass, index, i int
 	var temp negara
@@ -195,6 +209,7 @@ func peringkatDescending(N *daftarNegara, jumlahNegara int) {
 					}
 				}
 			}
+			i++
 		}
 		temp = N[pass-1]
 		N[pass-1] = N[index]
@@ -203,6 +218,7 @@ func peringkatDescending(N *daftarNegara, jumlahNegara int) {
 	}
 }
 
+// Fungsi untuk mengurutkan dari terendah ke tertinggi berdasarkan jumlah medali emas, perak, dan perunggu
 func peringkatAscending(N *daftarNegara, jumlahNegara int) {
 	var pass, i int
 	var temp negara
@@ -210,9 +226,9 @@ func peringkatAscending(N *daftarNegara, jumlahNegara int) {
 	pass = 1
 	for pass <= jumlahNegara-1 {
 		i = pass
-		temp = N[pass-1]
+		temp = N[pass]
 
-		for i > 0 && temp < N[i-1] {
+		for i > 0 && (temp.Emas < N[i-1].Emas || (temp.Emas == N[i-1].Emas && temp.Perak < N[i-1].Perak) || (temp.Emas == N[i-1].Emas && temp.Perak == N[i-1].Perak && temp.Perunggu < N[i-1].Perunggu)) {
 			N[i] = N[i-1]
 			i--
 		}
@@ -221,19 +237,21 @@ func peringkatAscending(N *daftarNegara, jumlahNegara int) {
 	}
 }
 
-func tampilkanKlasemen() {
-	var daftar daftarNegara
+// Fungsi untuk menampilkan klasemen berdasarkan
+func tampilkanKlasemen(daftar daftarNegara, jumlahnegara int) {
 	if jumlahNegara == 0 {
 		fmt.Println("\nBelum Ada Data Negara.")
 		return
 	}
 
-	fmt.Println("\n--- KLASEMEN MEDALI SEAGAMES ---")
-	fmt.Printf("%-3s | %-15s | %-5s | %-5s | %-5s\n", "No", "Negara", "Emas", "Perak", "Perunggu")
-	fmt.Println("--------------------------------------------------")
+	fmt.Print("\n====================================================")
+	fmt.Print("\n=             KLASEMEN MEDALI SEAGAMES             =")
+	fmt.Println("\n====================================================")
+	fmt.Printf("| %-3s | %-15s | %-5s | %-5s | %-5s |\n", "No", "Negara", "Emas", "Perak", "Perunggu")
+	fmt.Println("----------------------------------------------------")
 	for i := 0; i < jumlahNegara; i++ {
-		fmt.Printf("%-3d | %-15s | %-5d | %-5d | %-5d\n", i+1, daftar.Nama, daftar.Emas, daftar.Perak, daftar.Perunggu)
-		fmt.Println("--------------------------------------------------")
+		fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", i+1, daftar[i].Nama, daftar[i].Emas, daftar[i].Perak, daftar[i].Perunggu)
+		fmt.Println("----------------------------------------------------")
 	}
 }
 	
