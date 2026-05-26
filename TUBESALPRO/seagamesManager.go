@@ -33,7 +33,7 @@ func menu() {
 // Main Function
 func main(){
 	var pilihan, pUbah, kriteria, index int
-	var nama string
+	var nama, desc string
 	var N daftarNegara
 
 	pilihan = 0
@@ -42,7 +42,7 @@ func main(){
 	for pilihan != 5 {
 
 		menu()
-		fmt.Println("Pilih 1/2/3/4 ?")
+		fmt.Println("Pilih 1/2/3/4/5 ?")
 		fmt.Scan(&pilihan)
 
 		if  pilihan  == 1 {
@@ -83,10 +83,12 @@ func main(){
 
 			if kriteria == 1 {
 				peringkatDescending(&N, jumlahNegara)
-				tampilkanKlasemen(N, jumlahNegara)
+				desc = "Descending"
+				tampilkanKlasemen(N, jumlahNegara, desc)
 			} else if kriteria == 2 {
 				peringkatAscending(&N, jumlahNegara)
-				tampilkanKlasemen(N, jumlahNegara)
+				desc = "Ascending"
+				tampilkanKlasemen(N, jumlahNegara, desc)
 			}
 		} else if pilihan == 5 {
 			fmt.Println("Terima kasih telah menggunakan SEAGAMES MANAGER!")
@@ -238,12 +240,13 @@ func peringkatAscending(N *daftarNegara, jumlahNegara int) {
 }
 
 // Fungsi untuk menampilkan klasemen berdasarkan
-func tampilkanKlasemen(daftar daftarNegara, jumlahnegara int) {
+func tampilkanKlasemen(daftar daftarNegara, jumlahnegara int, desc string) {
 	if jumlahNegara == 0 {
 		fmt.Println("\nBelum Ada Data Negara.")
 		return
 	}
 
+	fmt.Printf("\n[Klasemen Peringkat: %s]", desc)
 	fmt.Print("\n====================================================")
 	fmt.Print("\n=             KLASEMEN MEDALI SEAGAMES             =")
 	fmt.Println("\n====================================================")
