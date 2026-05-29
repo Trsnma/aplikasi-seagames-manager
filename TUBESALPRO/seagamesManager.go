@@ -32,7 +32,7 @@ func menu() {
 
 // Main Function
 func main(){
-	var pilihan, pUbah, kriteria, index int
+	var pilihan, pUbah, kriteria,  kriteriaCari, index int
 	var nama, desc string
 	var N daftarNegara
 
@@ -97,9 +97,9 @@ func main(){
 			fmt.Scan(&kriteriaCari)
 			index =cariNegara(N, nama)
 
-			if idex != -1 {
+			if index != -1 {
 				fmt.Printf("| %-3s | %-15s | %-5s | %-5s | %-5s |\n", "No", "Negara", "Emas", "Perak", "Perunggu")
-				Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", index+1, daftar[index].Nama, daftar[index].Emas, daftar[index].Perak, daftar[index].Perunggu)
+				fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", index+1, N[index].Nama, N[index].Emas, N[index].Perak, N[index].Perunggu)
 			}
 
 
@@ -132,7 +132,7 @@ func cariNegaraIndex(N daftarNegara, nama string)int{
 	return index
 }
 
-func cariNegara(N daftarNegara, nama string){
+func cariNegara(N daftarNegara, nama string)int{
 	var kiri, kanan, tengah int
 	var found int = -1
 	kiri = 0
@@ -142,12 +142,13 @@ func cariNegara(N daftarNegara, nama string){
 		tengah = (kiri + kanan) / 2
 		if strings.EqualFold(N[tengah].Nama, nama) {
 			found = tengah
-		} else if strings.ToLower(N[tengah]) < strings.ToLower(nama) {
+		} else if strings.ToLower(N[tengah].Nama) < strings.ToLower(nama) {
 			kiri = tengah + 1
-	    } else if strings.ToLower(N[tengah]) > strings.ToLower(nama) {
+	    } else if strings.ToLower(N[tengah].Nama) > strings.ToLower(nama) {
 			kanan = tengah - 1
 		}
-		return found
+	}
+	return found
 }
 
 // fungsi untuk menambahkan negara baru ke dalam daftar
