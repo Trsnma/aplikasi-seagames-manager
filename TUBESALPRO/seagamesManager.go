@@ -170,30 +170,51 @@ func pilihanSesuaiMendali(N daftarNegara, kriteriaC int, desc string) {
 
 // fungsi untuk mencari negara berdasarkan kriteria mendali tertentu pada urutan descending
 func cariNegaraDescending(N daftarNegara, jenis string, target int) int {
-	var cariMendali int
+	var cariMendali, i int
 	var kiri, kanan, tengah int
+	var cekMendali int = target
 	var found int = -1
-	kiri = 0
-	kanan = jumlahNegara - 1
-	tengah = (kiri + kanan) / 2
 
 	if strings.EqualFold(jenis, "emas") {
-		cariMendali = N[tengah].Emas
-	} else if strings.EqualFold(jenis, "perak") {
-		cariMendali = N[tengah].Perak
-	} else if strings.EqualFold(jenis, "perunggu") {
-		cariMendali = N[tengah].Perunggu
+		kiri = 0
+		kanan = jumlahNegara - 1
+
+		for kiri <= kanan && found == -1 {
+			tengah = (kiri + kanan) / 2
+			cariMendali = N[tengah].Emas
+			if cariMendali == target {
+				found = tengah
+			} else if cariMendali < target {
+				kanan = tengah - 1
+			} else if cariMendali > target {
+				kiri = tengah + 1
+			}
+		}
+
+		if found != -1 {
+			cekMendali = target
+			for found > 0 && cekMendali == target {
+				cekMendali = N[found-1].Emas
+				if cekMendali == target {
+					found--
+				}
+			}
+		}
+		return found
 	}
 
-	for kiri <= kanan && found == -1 {
-		if cariMendali == target {
-			found = tengah
-			kanan = tengah - 1
-		} else if cariMendali < target {
-			kanan = tengah - 1
-		} else if cariMendali > target {
-			kiri = tengah + 1
+	i = 0
+	for i < jumlahNegara && found == -1 {
+		if strings.EqualFold(jenis, "perak") {
+			cariMendali = N[i].Perak
+		} else if strings.EqualFold(jenis, "perunggu") {
+			cariMendali = N[i].Perunggu
 		}
+
+		if cariMendali == target {
+			found = i
+		}
+		i++
 	}
 	return found
 }
@@ -229,39 +250,61 @@ func cariNegaraAscending(N daftarNegara, jenis string, target int) int {
 }
 
 // fungsi untuk mencetak negara yang ditemukan berdasarkan kriteria mendali tertentu pada urutan descending
-func cetakCariNegaraD(N daftarNegara, jenis string, target int){
+func cetakCariNegaraD(N daftarNegara, jenis string, target int) {
 	var idxAwal, i, j int
 	var jumlahTemuan int = 0
 	var cariMendali int
+	var ketemuKriteria bool = false
+	var nomerUrut int = 1
 
 	if strings.EqualFold(jenis, "emas") {
-		cariMendali = N[i].Emas
-	} else if strings.EqualFold(jenis, "perak") {
-		cariMendali = N[i].Perak
-	} else if strings.EqualFold(jenis, "perunggu") {
-		cariMendali = N[i].Perunggu
-	}
+		idxAwal = cariNegaraDescending(N, jenis, target)
+		if idxAwal != -1 {
+			i = idxAwal
+			cariMendali = N[i].Emas
 
-	idxAwal = cariNegaraDescending(N, jenis, target)
-	if idxAwal != -1 {
-		i = idxAwal
-		for i < jumlahNegara && cariMendali == target {
-			jumlahTemuan++
-			i++
-		}
+			// Hitung jumlah negara dengan emas yang sama (pasti berurutan)
+			for i < jumlahNegara && cariMendali == target {
+				jumlahTemuan++
+				i++
+				if i < jumlahNegara {
+					cariMendali = N[i].Emas
+				}
+			}
 
-		for j = idxAwal; j < idxAwal+jumlahTemuan; j++ {
+			// Cetak Tabel
 			fmt.Printf("| %-3s | %-15s | %-5s | %-5s | %-5s |\n", "No", "Negara", "Emas", "Perak", "Perunggu")
-			fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", j+1, N[j].Nama, N[j].Emas, N[j].Perak, N[j].Perunggu)
+			for j = idxAwal; j < idxAwal+jumlahTemuan; j++ {
+				fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", j-idxAwal+1, N[j].Nama, N[j].Emas, N[j].Perak, N[j].Perunggu)
+			}
+		} else {
+			fmt.Printf("\nTidak ditemukan negara dengan %d mendali %s.\n", target, jenis)
 		}
 	} else {
-		fmt.Printf("\nTidak ditemukan negara dengan %d mendali %s.\n", target, jenis)
-	}
+		for i = 0; i < jumlahNegara; i++ {
+			if strings.EqualFold(jenis, "perak") {
+				cariMendali = N[i].Perak
+			} else if strings.EqualFold(jenis, "perunggu") {
+				cariMendali = N[i].Perunggu
+			}
 
+			if cariMendali == target {
+				if !ketemuKriteria {
+					fmt.Printf("| %-3s | %-15s | %-5s | %-5s | %-5s |\n", "No", "Negara", "Emas", "Perak", "Perunggu")
+					ketemuKriteria = true
+				}
+				fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", nomerUrut, N[i].Nama, N[i].Emas, N[i].Perak, N[i].Perunggu)
+				nomerUrut++
+			}
+		}
+		if !ketemuKriteria {
+			fmt.Printf("\nTidak ditemukan negara dengan %d mendali %s.\n", target, jenis)
+		}
+	}
 }
 
 // fungsi untuk mencetak negara yang ditemukan berdasarkan kriteria mendali tertentu pada urutan ascending
-func cetakCariNegaraA(N daftarNegara, jenis string, target int){
+func cetakCariNegaraA(N daftarNegara, jenis string, target int) {
 	var idxAwal, i, j int
 	var jumlahTemuan int = 0
 	var cariMendali int
@@ -307,12 +350,13 @@ func analisisKemenangan(N daftarNegara, nama string) {
 
 	if targetIdx == -1 {
 		fmt.Printf("\nGagal: Negara '%s' Negara tidak ditemukan dalam klasemen.\n", nama)
-	}else if targetIdx == 0 {
+	} else if targetIdx == 0 {
 		fmt.Printf("%s sudah berada di posisi utama (Juara 1)!\n", N[0].Nama)
 	} else if targetIdx > 0 {
 		juara1 = N[0]
 		target = N[targetIdx]
 
+		fmt.Println()
 		fmt.Printf("ANALISIS KEBUTUHAN MENDALI %s UNTUK MENJADI JUARA 1\n", strings.ToUpper(target.Nama))
 		fmt.Printf("Peringkat Saat Ini : %d\n", targetIdx+1)
 		fmt.Println("---------------------------------------------------------")
@@ -335,6 +379,7 @@ func analisisKemenangan(N daftarNegara, nama string) {
 			}
 		}
 		fmt.Println("---------------------------------------------------------")
+		fmt.Println()
 	}
 }
 
@@ -401,7 +446,7 @@ func hapusNegara(N *daftarNegara, nama string) {
 
 	if index > -1 {
 		fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
-		
+
 		for i < jumlahNegara-1 {
 			N[i] = N[i+1]
 			i++
@@ -475,12 +520,12 @@ func tampilkanKlasemen(daftar daftarNegara, jumlahnegara int, desc string) {
 		fmt.Printf("| %-3s | %-15s | %-5s | %-5s | %-5s |\n", "No", "Negara", "Emas", "Perak", "Perunggu")
 		fmt.Println("----------------------------------------------------")
 		for i := 0; i < jumlahNegara; i++ {
-		fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", i+1, daftar[i].Nama, daftar[i].Emas, daftar[i].Perak, daftar[i].Perunggu)
-		fmt.Println("----------------------------------------------------")
+			fmt.Printf("| %-3d | %-15s | %-6d | %-6d | %-6d |\n", i+1, daftar[i].Nama, daftar[i].Emas, daftar[i].Perak, daftar[i].Perunggu)
+			fmt.Println("----------------------------------------------------")
 		}
 	} else {
 		fmt.Println("\nKlasemen kosong. Tidak ada negara yang terdaftar.")
 		fmt.Println()
 	}
-	
+
 }
