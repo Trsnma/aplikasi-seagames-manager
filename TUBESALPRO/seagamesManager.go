@@ -35,7 +35,7 @@ func menu() {
 
 // Main Function
 func main() {
-	var pilihan, pUbah, kriteria, kriteriaCari, index int
+	var pilihan int
 	var nama, desc string
 	var N daftarNegara
 
@@ -50,86 +50,45 @@ func main() {
 		fmt.Scan(&pilihan)
 
 		if pilihan == 1 {
-			fmt.Println("Masukkan nama negara yang ingin ditambahkan:")
-			fmt.Print("> ")
-			fmt.Scan(&nama)
 			tambahNegara(&N, nama)
 		} else if pilihan == 2 {
-			fmt.Println("Masukkan nama negara yang ingin diubah:")
-			fmt.Print("> ")
-			fmt.Scan(&nama)
-			index = cariNegaraIndex(N, nama)
-			if index != -1 {
-				fmt.Println("Apa yang ingin diubah?")
-				fmt.Println("1. Data Negara")
-				fmt.Println("2. Jumlah Medali")
-				fmt.Println("Pilih 1/2?")
-				fmt.Print("> ")
-				fmt.Scan(&pUbah)
-
-				if pUbah == 1 {
-					ubahDataNegara(&N, nama, index)
-				} else if pUbah == 2 {
-					ubahDataMedali(&N, nama, index)
-				} else {
-					fmt.Println("\nGagal: Pilihan tidak valid.")
-				}
-			} else {
-				fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
-			}
-
+			ubahData(&N, nama)
 		} else if pilihan == 3 {
-			fmt.Println("Masukkan nama negara yang ingin dihapus:")
-			fmt.Print("> ")
-			fmt.Scan(&nama)
 			hapusNegara(&N, nama)
 		} else if pilihan == 4 {
-			fmt.Println("Pilih kriteria peringkat:")
-			fmt.Println("1. Peringkat Tertinggi ke Rendah")
-			fmt.Println("2. Peringkat Rendah ke Tertinggi")
-			fmt.Print("> ")
-			fmt.Scan(&kriteria)
-
-			if kriteria == 1 {
-				peringkatDescending(&N, jumlahNegara)
-				desc = "Descending"
-				tampilkanKlasemen(N, jumlahNegara, desc)
-
-				if jumlahNegara > 0 {
-					fmt.Println("Ingin mencari negara dengan mendali tertentu?")
-					fmt.Println("1. ya")
-					fmt.Println("2. tidak")
-					fmt.Print("> ")
-					fmt.Scan(&kriteriaCari)
-
-					pilihanSesuaiMendali(N, kriteriaCari, desc)
-				}
-
-			} else if kriteria == 2 {
-				peringkatAscending(&N, jumlahNegara)
-				desc = "Ascending"
-				tampilkanKlasemen(N, jumlahNegara, desc)
-
-				if jumlahNegara > 0 {
-					fmt.Println("Ingin mencari negara dengan mendali tertentu?")
-					fmt.Println("1. ya")
-					fmt.Println("2. tidak")
-					fmt.Print("> ")
-					fmt.Scan(&kriteriaCari)
-
-					pilihanSesuaiMendali(N, kriteriaCari, desc)
-				}
-			}
+			peringkatKlasemen(&N, jumlahNegara, desc)
 		} else if pilihan == 5 {
-			fmt.Println("Masukan Nama Negara yang Ingin Dianalisis:")
-			fmt.Print("> ")
-			fmt.Scan(&nama)
-			analisisKemenangan(N, nama)
+			if jumlahNegara > 0 {
+				peringkatDescending(&N, jumlahNegara)
+				analisisKemenangan(&N, nama)
+			}
 		} else if pilihan == 6 {
 			fmt.Println("Terima kasih telah menggunakan SEAGAMES MANAGER!")
 		} else {
-			fmt.Println("\nGagal: Pilihan tidak valid. Silakan pilih 1/2/3/4/5.")
+			fmt.Println("Gagal: Pilihan tidak valid. Silakan pilih 1/2/3/4/5.")
 		}
+	}
+}
+
+// fungsi untuk menambahkan negara baru ke dalam daftar
+func tambahNegara(N *daftarNegara, nama string) {
+	var emas, perak, perunggu int
+
+	fmt.Println("Masukkan nama negara yang ingin ditambahkan:")
+	fmt.Print("> ")
+	fmt.Scan(&nama)
+
+	if jumlahNegara >= NMAX {
+		fmt.Println("\nGagal: Kapasitas maksimum negara peserta telah penuh!")
+	} else if cariNegaraIndex(*N, nama) != -1 {
+		fmt.Printf("\nGagal: Negara '%s' sudah terdaftar.\n", nama)
+	} else {
+		fmt.Println("Masukkan jumlah medali emas, perak, dan perunggu:")
+		fmt.Print("> ")
+		fmt.Scan(&emas, &perak, &perunggu)
+		N[jumlahNegara] = negara{Nama: nama, Emas: emas, Perak: perak, Perunggu: perunggu}
+		jumlahNegara++
+		fmt.Printf("\nBerhasil: Negara '%s' berhasil ditambahkan.\n", nama)
 	}
 }
 
@@ -145,6 +104,204 @@ func cariNegaraIndex(N daftarNegara, nama string) int {
 		i++
 	}
 	return index
+}
+
+// procedure untuk mengubah data negara atau mendali
+func ubahData(N *daftarNegara, nama string){
+	var pUbah, index int
+	var berhenti bool = false
+
+	fmt.Println("Masukkan nama negara yang ingin diubah:")
+	fmt.Print("> ")
+	fmt.Scan(&nama)
+	index = cariNegaraIndex(*N, nama)
+	if index != -1 {
+		for !berhenti{
+			fmt.Println("Apa yang ingin diubah?")
+			fmt.Println("1. Data Negara")
+			fmt.Println("2. Jumlah Medali")
+			fmt.Println("3. Kembali ke menu utama")
+			fmt.Println("Pilih 1/2/3?")
+			fmt.Print("> ")
+			fmt.Scan(&pUbah)
+
+			if pUbah == 1 {
+				ubahDataNegara(N, nama, index)
+				berhenti = true
+			} else if pUbah == 2 {
+				ubahDataMedali(N, nama, index)
+				berhenti = true
+			} else if pUbah == 3 {
+				berhenti = true
+			} else {
+				fmt.Println("\nGagal: Pilihan tidak valid.")
+			}
+		}
+	} else {
+		fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
+	}
+}
+
+// fungsi untuk mengubah data negara
+func ubahDataNegara(N *daftarNegara, nama string, index int) {
+	var emasBaru, perakBaru, perungguBaru int
+
+	fmt.Println("Masukkan jumlah medali emas, perak, dan perunggu yang baru:")
+	fmt.Print("Jumlah medali emas: ")
+	fmt.Scan(&emasBaru)
+	N[index].Emas = emasBaru
+	fmt.Print("Jumlah medali perak: ")
+	fmt.Scan(&perakBaru)
+	N[index].Perak = perakBaru
+	fmt.Print("Jumlah medali perunggu: ")
+	fmt.Scan(&perungguBaru)
+	N[index].Perunggu = perungguBaru
+	fmt.Printf("\nBerhasil: Data medali untuk negara '%s' berhasil diubah.\n", nama)
+
+}
+
+// Fungsi untuk mengubah data mendali yang spesifik
+func ubahDataMedali(N *daftarNegara, nama string, index int) {
+	var jumlahBaru int
+	var mendaliDiCari string
+
+	fmt.Println("Masukkan jenis medali yang ingin diubah (emas/perak/perunggu):")
+	fmt.Print("> ")
+	fmt.Scan(&mendaliDiCari)
+	fmt.Println("Masukkan jumlah medali yang baru:")
+	fmt.Print("> ")
+	fmt.Scan(&jumlahBaru)
+	if strings.EqualFold(mendaliDiCari, "emas") {
+		N[index].Emas = jumlahBaru
+	} else if strings.EqualFold(mendaliDiCari, "perak") {
+		N[index].Perak = jumlahBaru
+	} else if strings.EqualFold(mendaliDiCari, "perunggu") {
+		N[index].Perunggu = jumlahBaru
+	}
+}
+
+// Fungsi untuk menghapus negara dari daftar
+func hapusNegara(N *daftarNegara, nama string) {
+	var index int = cariNegaraIndex(*N, nama)
+	var i int = index
+
+	fmt.Println("Masukkan nama negara yang ingin dihapus:")
+	fmt.Print("> ")
+	fmt.Scan(&nama)
+
+	if index >= 0 {
+		for i < jumlahNegara-1 {
+			N[i] = N[i+1]
+			i++
+		}
+
+		N[jumlahNegara-1] = negara{}
+		jumlahNegara--
+		fmt.Printf("\nBerhasil: Negara '%s' berhasil dihapus.\n", nama)
+	} else {
+		fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
+	}
+}
+
+// procedure untuk menampilkan klasemen berdasarkan pilihan kriteria peringkat dan menangani pilihan mencari negara berdasarkan kriteria mendali tertentu
+func peringkatKlasemen(N *daftarNegara, jumlahNegara int, desc string) {
+	var kriteria, kriteriaCari int
+	var berhenti bool = false
+
+	for !berhenti {
+		fmt.Println("Pilih kriteria peringkat:")
+		fmt.Println("1. Peringkat Tertinggi ke Rendah")
+		fmt.Println("2. Peringkat Rendah ke Tertinggi")
+		fmt.Println("3. Kembali ke menu utama")
+		fmt.Print("> ")
+		fmt.Scan(&kriteria)
+
+		if kriteria == 1 {
+			peringkatDescending(N, jumlahNegara)
+			desc = "Descending"
+			tampilkanKlasemen(*N, jumlahNegara, desc)
+
+			if jumlahNegara > 0 {
+				fmt.Println("Ingin mencari negara dengan mendali tertentu?")
+				fmt.Println("1. ya")
+				fmt.Println("2. tidak")
+				fmt.Print("> ")
+				fmt.Scan(&kriteriaCari)
+
+				pilihanSesuaiMendali(*N, kriteriaCari, desc)
+			}
+			berhenti = true
+
+		} else if kriteria == 2 {
+			peringkatAscending(N, jumlahNegara)
+			desc = "Ascending"
+			tampilkanKlasemen(*N, jumlahNegara, desc)
+
+			if jumlahNegara > 0 {
+				fmt.Println("Ingin mencari negara dengan mendali tertentu?")
+				fmt.Println("1. ya")
+				fmt.Println("2. tidak")
+				fmt.Print("> ")
+				fmt.Scan(&kriteriaCari)
+
+				pilihanSesuaiMendali(*N, kriteriaCari, desc)
+			}
+			berhenti = true
+		} else if kriteria == 3 {
+			berhenti = true
+		}
+	}
+	
+}
+
+// Fungsi untuk mengurutkan dari tertinggi ke terendah berdasarkan jumlah medali emas, perak, dan perunggu
+func peringkatDescending(N *daftarNegara, jumlahNegara int) {
+	var pass, index, i int
+	var temp negara
+
+	pass = 1
+	for pass <= jumlahNegara-1 {
+		index = pass - 1
+		i = pass
+
+		for i < jumlahNegara {
+			if N[index].Emas < N[i].Emas {
+				index = i
+			} else if N[index].Emas == N[i].Emas {
+				if N[index].Perak < N[i].Perak {
+					index = i
+				} else if N[index].Perak == N[i].Perak {
+					if N[index].Perunggu < N[i].Perunggu {
+						index = i
+					}
+				}
+			}
+			i++
+		}
+		temp = N[pass-1]
+		N[pass-1] = N[index]
+		N[index] = temp
+		pass++
+	}
+}
+
+// Fungsi untuk mengurutkan dari terendah ke tertinggi berdasarkan jumlah medali emas, perak, dan perunggu
+func peringkatAscending(N *daftarNegara, jumlahNegara int) {
+	var pass, i int
+	var temp negara
+
+	pass = 1
+	for pass <= jumlahNegara-1 {
+		i = pass
+		temp = N[pass]
+
+		for i > 0 && (temp.Emas < N[i-1].Emas || (temp.Emas == N[i-1].Emas && temp.Perak < N[i-1].Perak) || (temp.Emas == N[i-1].Emas && temp.Perak == N[i-1].Perak && temp.Perunggu < N[i-1].Perunggu)) {
+			N[i] = N[i-1]
+			i--
+		}
+		N[i] = temp
+		pass++
+	}
 }
 
 // fungsi untuk menangani pilihan mencari negara berdasarkan kriteria mendali tertentu
@@ -166,108 +323,6 @@ func pilihanSesuaiMendali(N daftarNegara, kriteriaC int, desc string) {
 	} else if kriteriaC == 2 {
 		fmt.Println("Kembali ke menu utama...")
 	}
-}
-
-// fungsi untuk mencari negara berdasarkan kriteria mendali tertentu pada urutan descending
-func cariNegaraDescending(N daftarNegara, jenis string, target int) int {
-	var cariMendali, i int
-	var kiri, kanan, tengah int
-	var cekMendali int = target
-	var found int = -1
-
-	if strings.EqualFold(jenis, "emas") {
-		kiri = 0
-		kanan = jumlahNegara - 1
-
-		for kiri <= kanan && found == -1 {
-			tengah = (kiri + kanan) / 2
-			cariMendali = N[tengah].Emas
-			if cariMendali == target {
-				found = tengah
-			} else if cariMendali < target {
-				kanan = tengah - 1
-			} else if cariMendali > target {
-				kiri = tengah + 1
-			}
-		}
-
-		if found != -1 {
-			cekMendali = target
-			for found > 0 && cekMendali == target {
-				cekMendali = N[found-1].Emas
-				if cekMendali == target {
-					found--
-				}
-			}
-		}
-		return found
-	}
-
-	i = 0
-	for i < jumlahNegara && found == -1 {
-		if strings.EqualFold(jenis, "perak") {
-			cariMendali = N[i].Perak
-		} else if strings.EqualFold(jenis, "perunggu") {
-			cariMendali = N[i].Perunggu
-		}
-
-		if cariMendali == target {
-			found = i
-		}
-		i++
-	}
-	return found
-}
-
-// fungsi untuk mencari negara berdasarkan kriteria mendali tertentu pada urutan ascending
-func cariNegaraAscending(N daftarNegara, jenis string, target int) int {
-	var cariMendali, i int
-	var kiri, kanan, tengah int
-	var cekMendali int = target
-	var found int = -1
-
-	if strings.EqualFold(jenis, "emas") {
-		kiri = 0
-		kanan = jumlahNegara - 1
-		
-		for kiri <= kanan && found == -1 {
-			tengah = (kiri + kanan) / 2
-			cariMendali = N[tengah].Emas
-			if cariMendali == target {
-				found = tengah
-			} else if cariMendali < target {
-				kiri = tengah + 1
-			} else if cariMendali > target {
-				kanan = tengah - 1
-			}
-		}
-
-		if found != -1 {
-			cekMendali = target
-			for found > 0 && cekMendali == target {
-				cekMendali = N[found-1].Emas
-				if cekMendali == target {
-					found--
-				}
-			}
-		}
-		return found
-	}
-
-	i = 0
-	for i < jumlahNegara && found == -1 {
-		if strings.EqualFold(jenis, "perak") {
-			cariMendali = N[i].Perak
-		} else if strings.EqualFold(jenis, "perunggu") {
-			cariMendali = N[i].Perunggu
-		}
-
-		if cariMendali == target {
-			found = i
-		}
-		i++
-	}
-	return found
 }
 
 // fungsi untuk mencetak negara yang ditemukan berdasarkan kriteria mendali tertentu pada urutan descending
@@ -376,181 +431,106 @@ func cetakCariNegaraA(N daftarNegara, jenis string, target int) {
 	}
 }
 
-// fungsi untuk menganalisis kebutuhan mendali suatu negara untuk menjadi juara 1
-func analisisKemenangan(N daftarNegara, nama string) {
-	var juara1, target negara
-	var targetIdx int = -1
-	var i int = 0
-	var goals, goalsPerak, goalsPerunggu int
-	nama = strings.ToLower(nama)
+// fungsi untuk mencari negara berdasarkan kriteria mendali tertentu pada urutan descending
+func cariNegaraDescending(N daftarNegara, jenis string, target int) int {
+	var cariMendali, i int
+	var kiri, kanan, tengah int
+	var cekMendali int = target
+	var found int = -1
 
-	for i < jumlahNegara && targetIdx == -1 {
-		if strings.ToLower(N[i].Nama) == nama {
-			targetIdx = i
+	if strings.EqualFold(jenis, "emas") {
+		kiri = 0
+		kanan = jumlahNegara - 1
+
+		for kiri <= kanan && found == -1 {
+			tengah = (kiri + kanan) / 2
+			cariMendali = N[tengah].Emas
+			if cariMendali == target {
+				found = tengah
+			} else if cariMendali < target {
+				kanan = tengah - 1
+			} else if cariMendali > target {
+				kiri = tengah + 1
+			}
+		}
+
+		if found != -1 {
+			cekMendali = target
+			for found > 0 && cekMendali == target {
+				cekMendali = N[found-1].Emas
+				if cekMendali == target {
+					found--
+				}
+			}
+		}
+		return found
+	}
+
+	i = 0
+	for i < jumlahNegara && found == -1 {
+		if strings.EqualFold(jenis, "perak") {
+			cariMendali = N[i].Perak
+		} else if strings.EqualFold(jenis, "perunggu") {
+			cariMendali = N[i].Perunggu
+		}
+
+		if cariMendali == target {
+			found = i
 		}
 		i++
 	}
+	return found
+}
 
-	if targetIdx == -1 {
-		fmt.Printf("\nGagal: Negara '%s' Negara tidak ditemukan dalam klasemen.\n", nama)
-	} else if targetIdx == 0 {
-		fmt.Printf("%s sudah berada di posisi utama (Juara 1)!\n", N[0].Nama)
-	} else if targetIdx > 0 {
-		juara1 = N[0]
-		target = N[targetIdx]
+// fungsi untuk mencari negara berdasarkan kriteria mendali tertentu pada urutan ascending
+func cariNegaraAscending(N daftarNegara, jenis string, target int) int {
+	var cariMendali, i int
+	var kiri, kanan, tengah int
+	var cekMendali int = target
+	var found int = -1
 
-		fmt.Println()
-		fmt.Printf("ANALISIS KEBUTUHAN MENDALI %s UNTUK MENJADI JUARA 1\n", strings.ToUpper(target.Nama))
-		fmt.Printf("Peringkat Saat Ini : %d\n", targetIdx+1)
-		fmt.Println("---------------------------------------------------------")
-
-		if target.Emas < juara1.Emas {
-			goals = juara1.Emas - target.Emas
-			fmt.Printf("Untuk menggeser %s, %s membutuhkan minimal :\n", juara1.Nama, target.Nama)
-			fmt.Printf("> %+d Mendali Emas (Tanpa Memperdulikan Perak / Perunggu)\n", goals)
-			fmt.Printf("Sehingga Total Mendali Emas Menjadi %d (Menyamai %s, Namun Unggul Urutan / Kriteria lain\n)", juara1.Emas, juara1.Nama)
-			fmt.Printf("> Atau %+d Mendali Emas untuk Menang Mutlak.\n", goals+1)
-		} else if target.Emas == juara1.Emas {
-			if target.Perak < juara1.Perak {
-				goalsPerak = juara1.Perak - target.Perak
-				fmt.Printf("Jumlah Emas sudah sama dengan %s. %s membutuhkan:\n", juara1.Nama, target.Nama)
-				fmt.Printf("> %+d Medali Perak tambahan untuk menyalip.\n", goalsPerak+1)
-			} else if target.Perak == juara1.Perak {
-				goalsPerunggu = juara1.Perunggu - target.Perunggu
-				fmt.Printf("Jumlah Emas dan Perak sudah sama dengan %s. %s membutuhkan:\n", juara1.Nama, target.Nama)
-				fmt.Printf("> %+d Medali Perunggu tambahan untuk menyalip.\n", goalsPerunggu+1)
+	if strings.EqualFold(jenis, "emas") {
+		kiri = 0
+		kanan = jumlahNegara - 1
+		
+		for kiri <= kanan && found == -1 {
+			tengah = (kiri + kanan) / 2
+			cariMendali = N[tengah].Emas
+			if cariMendali == target {
+				found = tengah
+			} else if cariMendali < target {
+				kiri = tengah + 1
+			} else if cariMendali > target {
+				kanan = tengah - 1
 			}
 		}
-		fmt.Println("---------------------------------------------------------")
-		fmt.Println()
-	}
-}
 
-// fungsi untuk menambahkan negara baru ke dalam daftar
-func tambahNegara(N *daftarNegara, nama string) {
-	var emas, perak, perunggu int
-
-	if jumlahNegara >= NMAX {
-		fmt.Println("\nGagal: Kapasitas maksimum negara peserta telah penuh!")
-	} else if cariNegaraIndex(*N, nama) != -1 {
-		fmt.Printf("\nGagal: Negara '%s' sudah terdaftar.\n", nama)
-	} else {
-		fmt.Println("Masukkan jumlah medali emas, perak, dan perunggu:")
-		fmt.Print("> ")
-		fmt.Scan(&emas, &perak, &perunggu)
-		N[jumlahNegara] = negara{Nama: nama, Emas: emas, Perak: perak, Perunggu: perunggu}
-		jumlahNegara++
-		fmt.Printf("\nBerhasil: Negara '%s' berhasil ditambahkan.\n", nama)
-	}
-}
-
-// fungsi untuk mengubah data negara
-func ubahDataNegara(N *daftarNegara, nama string, index int) {
-	var emasBaru, perakBaru, perungguBaru int
-
-	fmt.Println("Masukkan jumlah medali emas, perak, dan perunggu yang baru:")
-	fmt.Print("Jumlah medali emas: ")
-	fmt.Scan(&emasBaru)
-	N[index].Emas = emasBaru
-	fmt.Print("Jumlah medali perak: ")
-	fmt.Scan(&perakBaru)
-	N[index].Perak = perakBaru
-	fmt.Print("Jumlah medali perunggu: ")
-	fmt.Scan(&perungguBaru)
-	N[index].Perunggu = perungguBaru
-	fmt.Printf("\nBerhasil: Data medali untuk negara '%s' berhasil diubah.\n", nama)
-
-}
-
-// Fungsi untuk mengubah data mendali yang spesifik
-func ubahDataMedali(N *daftarNegara, nama string, index int) {
-	var jumlahBaru int
-	var mendaliDiCari string
-
-	fmt.Println("Masukkan jenis medali yang ingin diubah (emas/perak/perunggu):")
-	fmt.Print("> ")
-	fmt.Scan(&mendaliDiCari)
-	fmt.Println("Masukkan jumlah medali yang baru:")
-	fmt.Print("> ")
-	fmt.Scan(&jumlahBaru)
-	if strings.EqualFold(mendaliDiCari, "emas") {
-		N[index].Emas = jumlahBaru
-	} else if strings.EqualFold(mendaliDiCari, "perak") {
-		N[index].Perak = jumlahBaru
-	} else if strings.EqualFold(mendaliDiCari, "perunggu") {
-		N[index].Perunggu = jumlahBaru
-	}
-}
-
-// Fungsi untuk menghapus negara dari daftar
-func hapusNegara(N *daftarNegara, nama string) {
-	var index int = cariNegaraIndex(*N, nama)
-	var i int = index
-
-	if index > -1 {
-		fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
-
-		for i < jumlahNegara-1 {
-			N[i] = N[i+1]
-			i++
-		}
-
-		N[jumlahNegara-1] = negara{}
-		jumlahNegara--
-		fmt.Printf("\nBerhasil: Negara '%s' berhasil dihapus.\n", nama)
-	} else {
-		fmt.Printf("\nGagal: Negara '%s' tidak ditemukan.\n", nama)
-	}
-}
-
-// Fungsi untuk mengurutkan dari tertinggi ke terendah berdasarkan jumlah medali emas, perak, dan perunggu
-func peringkatDescending(N *daftarNegara, jumlahNegara int) {
-	var pass, index, i int
-	var temp negara
-
-	pass = 1
-	for pass <= jumlahNegara-1 {
-		index = pass - 1
-		i = pass
-
-		for i < jumlahNegara {
-			if N[index].Emas < N[i].Emas {
-				index = i
-			} else if N[index].Emas == N[i].Emas {
-				if N[index].Perak < N[i].Perak {
-					index = i
-				} else if N[index].Perak == N[i].Perak {
-					if N[index].Perunggu < N[i].Perunggu {
-						index = i
-					}
+		if found != -1 {
+			cekMendali = target
+			for found > 0 && cekMendali == target {
+				cekMendali = N[found-1].Emas
+				if cekMendali == target {
+					found--
 				}
 			}
-			i++
 		}
-		temp = N[pass-1]
-		N[pass-1] = N[index]
-		N[index] = temp
-		pass++
+		return found
 	}
-}
 
-// Fungsi untuk mengurutkan dari terendah ke tertinggi berdasarkan jumlah medali emas, perak, dan perunggu
-func peringkatAscending(N *daftarNegara, jumlahNegara int) {
-	var pass, i int
-	var temp negara
-
-	pass = 1
-	for pass <= jumlahNegara-1 {
-		i = pass
-		temp = N[pass]
-
-		for i > 0 && (temp.Emas < N[i-1].Emas || (temp.Emas == N[i-1].Emas && temp.Perak < N[i-1].Perak) || (temp.Emas == N[i-1].Emas && temp.Perak == N[i-1].Perak && temp.Perunggu < N[i-1].Perunggu)) {
-			N[i] = N[i-1]
-			i--
+	i = 0
+	for i < jumlahNegara && found == -1 {
+		if strings.EqualFold(jenis, "perak") {
+			cariMendali = N[i].Perak
+		} else if strings.EqualFold(jenis, "perunggu") {
+			cariMendali = N[i].Perunggu
 		}
-		N[i] = temp
-		pass++
+
+		if cariMendali == target {
+			found = i
+		}
+		i++
 	}
+	return found
 }
 
 // Fungsi untuk menampilkan klasemen berdasarkan
@@ -572,3 +552,66 @@ func tampilkanKlasemen(daftar daftarNegara, jumlahnegara int, desc string) {
 	}
 
 }
+
+
+// fungsi untuk menganalisis kebutuhan mendali suatu negara untuk menjadi juara 1
+func analisisKemenangan(N *daftarNegara, nama string) {
+	var juara1, target negara
+	var targetIdx int = -1
+	var i int = 0
+	var goals, goalsPerak, goalsPerunggu int
+
+	fmt.Println("Masukan Nama Negara yang Ingin Dianalisis:")
+	fmt.Print("> ")
+	fmt.Scan(&nama)
+
+	nama = strings.ToLower(nama)
+
+	for i < jumlahNegara && targetIdx == -1 {
+		if strings.ToLower(N[i].Nama) == nama {
+			targetIdx = i
+		}
+		i++
+	}
+
+	if targetIdx == -1 {
+		fmt.Printf("\nGagal: Negara '%s' Negara tidak ditemukan dalam klasemen.\n", nama)
+	} else if targetIdx == 0 {
+		fmt.Printf("%s sudah berada di posisi utama (Juara 1)!\n", N[0].Nama)
+	} else if targetIdx > 0 {
+		juara1 = (*N)[0]
+		target = N[targetIdx]
+
+		fmt.Println()
+		fmt.Printf("ANALISIS KEBUTUHAN MENDALI %s UNTUK MENJADI JUARA 1\n", strings.ToUpper(target.Nama))
+		fmt.Printf("Peringkat Saat Ini : %d\n", targetIdx+1)
+		fmt.Println("---------------------------------------------------------")
+
+		if target.Emas < juara1.Emas {
+			goals = juara1.Emas - target.Emas + 1
+			fmt.Printf("Untuk menggeser %s, %s membutuhkan minimal :\n", juara1.Nama, target.Nama)
+			fmt.Printf("> %+d Mendali Emas untuk Menang Mutlak (Tanpa Memperdulikan Perak / Perung2gu)\n", goals)
+			fmt.Printf("Sehingga Total Mendali Emas Menjadi %d\n", target.Emas + goals)
+		} else if target.Emas == juara1.Emas {
+			if target.Perak < juara1.Perak {
+				goalsPerak = juara1.Perak - target.Perak + 1
+				fmt.Printf("Jumlah Emas sudah sama dengan %s. %s membutuhkan:\n", juara1.Nama, target.Nama)
+				fmt.Printf("> %+d Medali Perak tambahan untuk menyalip.\n", goalsPerak)
+			} else if target.Perak == juara1.Perak {
+				if target.Perunggu < juara1.Perunggu {
+					goalsPerunggu = juara1.Perunggu - target.Perunggu + 1
+					fmt.Printf("Jumlah Emas dan Perak sudah sama dengan %s. %s membutuhkan:\n", juara1.Nama, target.Nama)
+					fmt.Printf("> %+d Medali Perunggu tambahan untuk menyalip.\n", goalsPerunggu+1)
+				} else {
+					fmt.Printf("%s Sudah di Atas %s berdasarkan kriteria peringkat", target.Nama, juara1.Nama)
+				}
+			} else {
+				fmt.Printf("%s sudah di atas %s berdasarkan jumlah Perak.\n", target.Nama, juara1.Nama)
+			}
+		}
+		fmt.Println("---------------------------------------------------------")
+		fmt.Println()
+	}
+}
+
+
